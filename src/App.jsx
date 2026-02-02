@@ -48,8 +48,26 @@ export default function App() {
     socket.on("room-metrics", (data) => setParticipantCount(data.users));
 
     socket.on("text-update", (value) => {
+      if (!editorRef.current) return;
+
       isRemoteUpdate.current = true;
-      setText(value);
+
+      const editor = editorRef.current;
+      const model = editor.getModel();
+      if (!model) return;
+
+      if (model.getValue() !== value) {
+        model.pushEditOperations(
+          [],
+          [
+            {
+              range: model.getFullModelRange(),
+              text: value,
+            },
+          ],
+          () => null,
+        );
+      }
     });
 
     return () => {
@@ -195,6 +213,9 @@ export default function App() {
             }}
           >
             <Editor
+              onMount={(editor) => {
+                editorRef.current = editor;
+              }}
               height="100%"
               theme="vs-dark"
               defaultLanguage="javascript"
