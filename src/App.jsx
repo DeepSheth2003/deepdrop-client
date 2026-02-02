@@ -205,6 +205,19 @@ export default function App() {
                 smoothScrolling: true,
                 cursorBlinking: "expand",
                 lineHeight: 1.6,
+
+                // 🔥 IMPORTANT FIXES
+                quickSuggestions: false,
+                suggestOnTriggerCharacters: false,
+                acceptSuggestionOnEnter: "off",
+                tabCompletion: "off",
+                wordBasedSuggestions: "off",
+
+                // UX improvements
+                autoClosingBrackets: "never",
+                autoClosingQuotes: "never",
+                formatOnPaste: false,
+                formatOnType: false,
               }}
             />
           </Paper>
