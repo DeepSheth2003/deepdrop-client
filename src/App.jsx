@@ -36,6 +36,7 @@ export default function App() {
 
   const roomId = window.location.pathname.slice(1) || "lobby";
   const editorRef = useRef(null);
+  const isRemoteUpdate = useRef(false);
 
   useEffect(() => {
     socket.on("connect", () => setConnected(true));
@@ -47,7 +48,8 @@ export default function App() {
     socket.on("room-metrics", (data) => setParticipantCount(data.users));
 
     socket.on("text-update", (value) => {
-      if (value !== text) setText(value);
+      isRemoteUpdate.current = true;
+      setText(value);
     });
 
     return () => {
@@ -56,17 +58,18 @@ export default function App() {
       socket.off("text-update");
       socket.off("room-metrics");
     };
-  }, [roomId, text]);
+  }, [roomId]);
 
   const handleEditorChange = (value) => {
+    if (isRemoteUpdate.current) {
+      isRemoteUpdate.current = false;
+      return;
+    }
+
     setText(value);
     setSyncing(true);
-
-    // Emit change
     socket.emit("text-change", { roomId, text: value });
-
-    // Mock sync completion for UI feel
-    setTimeout(() => setSyncing(false), 500);
+    setTimeout(() => setSyncing(false), 300);
   };
 
   return (
@@ -195,7 +198,7 @@ export default function App() {
               height="100%"
               theme="vs-dark"
               defaultLanguage="javascript"
-              value={text}
+              defaultValue={text}
               onChange={handleEditorChange}
               options={{
                 fontSize: 16,
